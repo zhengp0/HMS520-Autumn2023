@@ -68,13 +68,82 @@ df_death_add <- cbind(df_death, df_death_new_col)
 
 # 4.  join ----------------------------------------------------------------
 
+df_combined <- left_join(
+  df_death,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id")
+)
+
 # what if there are columns with the same name: suffix
+df_death_second <- df_death
+df_combined <- left_join(
+  df_death,
+  df_death_second,
+  by = c("location_id", "age_group_id", "sex_id"),
+  suffix = c("", "_second")
+)
 
 # what if the number of rows are different: left, right, inner
+df_death_extra <- data.frame(
+  location_id = 6,
+  age_group_id = 1:5,
+  sex_id = 1,
+  death = 5
+)
+df_death_add <- bind_rows(df_death, df_death_extra)
+df_combined <- left_join(
+  df_death_add,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id")
+)
+df_combined <- right_join(
+  df_death_add,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id")
+)
+df_combined <- inner_join(
+  df_death_add,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id")
+)
+df_combined <- full_join(
+  df_death_add,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id")
+)
 
 # what if there are multiple matches
+df1 <- data.frame(
+  key = c(1, 1, 2, 2),
+  value = c(1, 2, 3, 4)
+)
+df2 <- data.frame(
+  key = c(1, 1, 2),
+  value = c(5, 6, 7)
+)
+df_combined <- left_join(
+  df1,
+  df2,
+  by = "key",
+  suffix = c("1", "2"),
+  relationship = "many-to-many"
+)
 
 # what if the names you try to match are different in two data frames
+df1 <- data.frame(
+  key1 = c(1, 1, 2, 2),
+  value1 = c(1, 2, 3, 4)
+)
+df2 <- data.frame(
+  key2 = c(1, 1, 2),
+  value2 = c(5, 6, 7)
+)
+df_combined <- left_join(
+  df1,
+  df2,
+  by = c("key1" = "key2"),
+  relationship = "many-to-many"
+)
 
 # 5.  group ---------------------------------------------------------------
 df_group <- group_by(
@@ -105,9 +174,21 @@ df_summarize <- summarize(
 # 8.  pivot ---------------------------------------------------------------
 
 # pivot long
+df_long <- pivot_longer(
+  df_hours,
+  cols = !project,
+  names_to = "employee",
+  values_to = "hours"
+)
 
 # compute how much do we pay for each employee
 
 # pivot wide
+df_wide <- pivot_wider(
+  df_long,
+  id_cols = project,
+  names_from = employee,
+  values_from = hours
+)
 
 # which religion earn the most?

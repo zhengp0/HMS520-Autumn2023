@@ -170,6 +170,13 @@ df_summarize <- summarize(
 # compute average death_rate for location 1, 2, 3, 4 and
 # rank data frame by desc order of the death_rate
 
+df_final <- df_death %>%
+  filter(location_id %in% c(1, 2, 3, 4)) %>%
+  left_join(df_population, by = c("location_id", "age_group_id", "sex_id")) %>%
+  mutate(death_rate = death / population) %>%
+  group_by(location_id) %>%
+  summarize(mean_death_rate = mean(death_rate)) %>%
+  arrange(-mean_death_rate)
 
 # 8.  pivot ---------------------------------------------------------------
 
@@ -192,3 +199,26 @@ df_wide <- pivot_wider(
 )
 
 # which religion earn the most?
+df_relig <- relig_income %>%
+  pivot_longer(
+    cols = !religion,
+    names_to = "income",
+    values_to = "count"
+  ) %>%
+  filter(income != "Don't know/refused")
+  
+df_final <- df_relig %>%
+  group_by(religion) %>%
+  summarize(total = sum(count)) %>%
+  right_join(df_relig, by = "religion") %>%
+  mutate(prop = count / total) %>%
+  pivot_wider(
+    id_cols = religion,
+    names_from = income,
+    values_from = prop
+  ) %>%
+  arrange(-`>150k`)
+  
+
+
+

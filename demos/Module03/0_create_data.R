@@ -34,7 +34,7 @@ df_hours <- data.frame(
 )
 
 df_pay <- data.frame(
-  porject = 1:5,
+  project = 1:5,
   dollar_per_hour = rpois(5, 40)
 )
 

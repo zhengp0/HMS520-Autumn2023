@@ -47,7 +47,19 @@ df_death_add[, log_death := log(death)]
 df_death_add[, `:=`(log_death = log(death), sqrt_death = sqrt(death))]
 
 # rbind, cbind
+df_death_extra_row <- data.table(
+  location_id = 6,
+  age_group_id = 1:5,
+  sex_id = 1,
+  death = 5
+)
+df_death_add <- rbind(df_death, df_death_extra_row)
 
+df_death_extra_col <- data.table(
+  row_id = seq_len(nrow(df_death)),
+  random = rnorm(nrow(df_death))
+)
+df_death_add <- cbind(df_death, df_death_extra_col)
 
 # 4.  join ----------------------------------------------------------------
 df_combined <- merge(
@@ -150,12 +162,74 @@ df_death_group <- df_death[, list(death = sum(death)), by = list(location_id, ag
 # compute average death_rate for location 1, 2, 3, 4 and
 # rank data frame by desc order of the death_rate
 
+df_combined <- merge(
+  df_death,
+  df_population,
+  by = c("location_id", "age_group_id", "sex_id"),
+  all.x = TRUE
+)
+
+df_result <- df_combined[
+  location_id %in% c(1, 2, 3, 4),
+][
+  , death_rate := death / population
+][
+  , list(mean_death_rate = mean(death_rate)), by = "location_id"
+][
+  order(-mean_death_rate),
+]
+
+
 # 8.  pivot ---------------------------------------------------------------
 
 # pivot long
+df_long <- melt(
+  df_hours,
+  id.vars = "project",
+  measure.vars = c("A", "B", "C", "D"),
+  variable.name = "employee",
+  value.name = "hours"
+)
 
 # compute how much do we pay for each employee
+df_result <- merge(
+  df_long,
+  df_pay,
+  by = "project",
+  all.x = TRUE
+)
+df_result[, pay := hours * dollar_per_hour]
+df_total <- df_result[, list(total = sum(pay)), by = "employee"]
 
 # pivot wide
+df_wide <- dcast(
+  df_result,
+  project ~ employee,
+  value.var = "pay"
+)
 
 # which religion earn the most?
+library("tidyr")
+
+View(relig_income)
+
+dt_relig_income <- as.data.table(relig_income)
+
+col_names <- colnames(dt_relig_income)
+col_names <- col_names[!(col_names %in% c("religion", "Don't know/refused"))]
+dt_long <- melt(
+  dt_relig_income,
+  id.vars = "religion",
+  measure.vars = col_names,
+  variable.name = "income",
+  value.name = "count"
+)
+
+dt_long[, total := sum(count), by = "religion"]
+dt_long[, prop := count / total]
+
+dt_wide <- dcast(
+  dt_long,
+  religion ~ income,
+  value.var = "prop"
+)

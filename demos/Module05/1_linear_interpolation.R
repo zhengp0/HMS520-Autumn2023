@@ -24,8 +24,4 @@ plot_fit(dt_iris) +
 
 
 # summarize fit -----------------------------------------------------------
-insample_rmse <- with(dt_iris[test == 0,], get_rmse(Sepal.Width, sepal_width_fit))
-outsample_rmse <- with(dt_iris[test == 1,], get_rmse(Sepal.Width, sepal_width_fit))
-
-print(paste("insample_rmse:", insample_rmse))
-print(paste("outsample_rmse:", outsample_rmse))
+performance <- get_performance(dt_iris)

@@ -12,7 +12,7 @@ state_map <- fread(file.path(module_dir, "data/state_map.csv"))
 heat_map <- counts[, lapply(.SD, median), by = state_name, .SDcols = c("ifr", "mr")]
 heat_map <- merge(heat_map, state_map, by = "state_name")
 
-state_names <- unique(state_map[["state_name"]])
+state_names <- unique(counts[["state_name"]])
 
 variables <- list(
   time_series = c("cases", "deaths", "new_cases", "new_deaths", "ifr", "mr"),
